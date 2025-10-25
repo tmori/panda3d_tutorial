@@ -1,5 +1,5 @@
 from panda3d.core import NodePath, Vec3
-from primitive.polygon import Polygon, Cube
+from primitive.polygon import Polygon, Cube, Plane
 from primitive.render import RenderEntity
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import TextNode
@@ -9,6 +9,12 @@ class App(ShowBase):
     def __init__(self):
         super().__init__()
         self.disableMouse()
+
+        # 床
+        floor = RenderEntity(self.render, "floor")
+        floor.set_polygon(Plane(size=5.0))
+        floor.set_pos(0, 0, 0.0)
+        
 
         # 空のエンティティ作成
         self.entity = RenderEntity(self.render, "cube_entity")
@@ -35,18 +41,18 @@ class App(ShowBase):
         # 入力（1回で1cm）
         self.step = 0.01
         self.step_deg = 5  # 5度
-        self.accept("k", self.entity.move, [ self.step, 0, 0])  # 右へ
         self.accept("j", self.entity.move, [-self.step, 0, 0])  # 左へ
+        self.accept("k", self.entity.move, [ self.step, 0, 0])  # 右へ
         self.accept("i", self.entity.move, [0, self.step, 0])  # 前へ
         self.accept("m", self.entity.move, [0, -self.step, 0])  # 後ろへ
-        self.accept("u", self.entity.move, [0, 0, self.step])  # 上へ
-        self.accept("o", self.entity.move, [0, 0, -self.step])  # 下へ
-        self.accept("r", self.entity.rotate, [0, 0, self.step_deg])  # 右回転
-        self.accept("l", self.entity.rotate, [0, 0, -self.step_deg])  # 左回転
-        self.accept("p", self.entity.rotate, [self.step_deg, 0, 0])  # 上回転
-        self.accept(";", self.entity.rotate, [-self.step_deg, 0, 0])  # 下回転
-        self.accept("o", self.entity.rotate, [0, self.step_deg, 0])  # 時計回り
-        self.accept("k", self.entity.rotate, [0, -self.step_deg, 0])  # 反時計回り
+        self.accept("w", self.entity.move, [0, 0, self.step])  # 上へ
+        self.accept("s", self.entity.move, [0, 0, -self.step])  # 下へ
+        self.accept("f", self.entity.rotate, [0, 0, self.step_deg])  # 右回転
+        self.accept("a", self.entity.rotate, [0, 0, -self.step_deg])  # 左回転
+        self.accept("r", self.entity.rotate, [self.step_deg, 0, 0])  # 上回転
+        self.accept("v", self.entity.rotate, [-self.step_deg, 0, 0])  # 下回転
+        self.accept("t", self.entity.rotate, [0, self.step_deg, 0])  # 時計回り
+        self.accept("g", self.entity.rotate, [0, -self.step_deg, 0])  # 反時計回り
         self.accept("escape", self.userExit)
 
 

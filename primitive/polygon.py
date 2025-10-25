@@ -56,3 +56,45 @@ class Cube(Polygon):
         geom = Geom(vdata); geom.addPrimitive(prim)
         node = GeomNode(name); node.addGeom(geom)
         return node
+    
+class Plane(Polygon):
+    """Unity の Plane に相当（XZ 平面・原点中心）。size は一辺の長さ。"""
+    def __init__(self, size: float = 2.0, color: Color = (0.9, 0.95, 1.0, 1.0)):
+        s = size * 0.5
+        # XY平面で Z=0 が床（上方向は +Z）
+        self.vtx: List[Vec3] = [
+            Vec3(-s, -s, 0),  # 0
+            Vec3( s, -s, 0),  # 1
+            Vec3( s,  s, 0),  # 2
+            Vec3(-s,  s, 0),  # 3
+        ]
+        self.tris: List[Tuple[int, int, int]] = [
+            (0, 1, 2),
+            (0, 2, 3),
+        ]
+        # 4 頂点すべて同色（単色）
+        self.colors: List[Color] = [color] * 4
+
+    def make_geom_node(self, name: str = "plane") -> GeomNode:
+        vformat = GeomVertexFormat.getV3c4()
+        vdata = GeomVertexData(name, vformat, Geom.UH_static)
+        vdata.setNumRows(len(self.vtx))
+
+        vw = GeomVertexWriter(vdata, "vertex")
+        cw = GeomVertexWriter(vdata, "color")
+        for p, col in zip(self.vtx, self.colors):
+            vw.addData3f(p)
+            cw.addData4f(*col)
+
+        prim = GeomTriangles(Geom.UH_static)
+        for a, b, c in self.tris:
+            prim.addVertices(a, b, c)
+        prim.closePrimitive()
+
+        geom = Geom(vdata)
+        geom.addPrimitive(prim)
+        node = GeomNode(name)
+        node.addGeom(geom)
+        return node
+
+
