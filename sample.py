@@ -14,9 +14,15 @@ class App(ShowBase):
         super().__init__()
         self.disableMouse()
 
-        # --- 照明セットアップ（先に設定） ---
         self.render.setShaderAuto()
-        #self.lights = LightRig(self.render, shadows=True)
+
+        drone_model = RenderEntity(self.render, "drone_model")
+        drone_model.load_model(self.loader, "assets/models/dji_avatar2.glb", copy=False)
+        drone_model.set_pos(0, 0.0, 1)
+        drone_model._geom_np.setHpr(0, 180, 0)
+
+        # --- 照明セットアップ（先に設定） ---
+        self.lights = LightRig(self.render, shadows=True)
 
         # 床
         floor = RenderEntity(self.render, "floor")
@@ -25,23 +31,17 @@ class App(ShowBase):
         #floor.np.set_tag('ShadowReceiver', 'true')
 
         # 床は影を受ける
-        #floor.np.show()  # 念のため
+        floor.np.show()  # 念のため
 
         # 空のエンティティ作成
-        self.entity = RenderEntity(self.render, "cube_entity")
+        self.entity = drone_model
 
-        # キューブの形状を作成
-        cube = Cube(size=0.2)
-        # 形状注入
-        self.entity.set_polygon(cube)
 
-        #self.entity.np.set_tag('ShadowCaster', 'true')
+        self.entity.np.set_tag('ShadowCaster', 'true')
 
-        # Cubeの位置
-        self.entity.set_pos(0, 0, 0.3)  # 床から少し浮かせる
 
         # --- ここからカメラ ---
-        target = Point3(0, 0, 0.15)  # キューブの中心あたりを見る
+        target = Point3(drone_model.np.getPos(self.render))
         self.cam_ctrl = OrbitCamera(
             self,
             target=target,
@@ -52,8 +52,8 @@ class App(ShowBase):
         self.cam_ctrl.enable()
 
         # キーバインド
-        #self.accept("1", lambda: self.lights.toggle(True))
-        #self.accept("2", lambda: self.lights.toggle(False))
+        self.accept("1", lambda: self.lights.toggle(True))
+        self.accept("2", lambda: self.lights.toggle(False))
 
         # テキスト（右下）
         self.pos_text = OnscreenText(
