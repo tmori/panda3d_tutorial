@@ -25,3 +25,7 @@ class RenderEntity:
 
     def set_hpr(self, h, p, r): 
         self.np.setHpr(h, p, r)
+
+    def rotate(self, dh=0, dp=0, dr=0): 
+        h, p, r = self.np.getHpr()
+        self.np.setHpr(h + dh, p + dp, r + dr)

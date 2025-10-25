@@ -22,7 +22,7 @@ class App(ShowBase):
         self.entity.set_pos(0, 1.5, 0.2)
 
         # カメラの位置設定
-        self.cam.setPos(0, 0.5, 0.5)
+        self.cam.setPos(0, 0.0, 0.5)
         self.cam.lookAt(self.entity.np)
 
         # テキスト（右下）
@@ -34,8 +34,19 @@ class App(ShowBase):
 
         # 入力（1回で1cm）
         self.step = 0.01
+        self.step_deg = 5  # 5度
         self.accept("k", self.entity.move, [ self.step, 0, 0])  # 右へ
         self.accept("j", self.entity.move, [-self.step, 0, 0])  # 左へ
+        self.accept("i", self.entity.move, [0, self.step, 0])  # 前へ
+        self.accept("m", self.entity.move, [0, -self.step, 0])  # 後ろへ
+        self.accept("u", self.entity.move, [0, 0, self.step])  # 上へ
+        self.accept("o", self.entity.move, [0, 0, -self.step])  # 下へ
+        self.accept("r", self.entity.rotate, [0, 0, self.step_deg])  # 右回転
+        self.accept("l", self.entity.rotate, [0, 0, -self.step_deg])  # 左回転
+        self.accept("p", self.entity.rotate, [self.step_deg, 0, 0])  # 上回転
+        self.accept(";", self.entity.rotate, [-self.step_deg, 0, 0])  # 下回転
+        self.accept("o", self.entity.rotate, [0, self.step_deg, 0])  # 時計回り
+        self.accept("k", self.entity.rotate, [0, -self.step_deg, 0])  # 反時計回り
         self.accept("escape", self.userExit)
 
 
