@@ -2,6 +2,8 @@ from panda3d.core import NodePath, Vec3
 from primitive.polygon import Polygon, Cube
 from primitive.render import RenderEntity
 from direct.showbase.ShowBase import ShowBase
+from panda3d.core import TextNode
+from direct.gui.OnscreenText import OnscreenText
 
 class App(ShowBase):
     def __init__(self):
@@ -16,18 +18,31 @@ class App(ShowBase):
         # 形状注入
         self.entity.set_polygon(cube)
 
-        # エンティティの位置設定
+        # Cubeの位置はそのまま
         self.entity.set_pos(0, 1.5, 0.2)
 
         # カメラの位置設定
         self.cam.setPos(0, 0.5, 0.5)
         self.cam.lookAt(self.entity.np)
 
+        # テキスト（右下）
+        self.pos_text = OnscreenText(
+            text="", pos=(1.2, -0.95),  # 右下
+            scale=0.05, fg=(1, 1, 1, 1), align=TextNode.ARight, mayChange=True
+        )
+        self.taskMgr.add(self.update_text, "update_text_task")
+
         # 入力（1回で1cm）
         self.step = 0.01
-        self.accept("j", self.entity.move, [ self.step, 0, 0])  # 右へ
-        self.accept("k", self.entity.move, [-self.step, 0, 0])  # 左へ
+        self.accept("k", self.entity.move, [ self.step, 0, 0])  # 右へ
+        self.accept("j", self.entity.move, [-self.step, 0, 0])  # 左へ
         self.accept("escape", self.userExit)
+
+
+    def update_text(self, task):
+        pos = self.entity.np.getPos(self.render)
+        self.pos_text.setText(f"x={pos.x:.2f}  y={pos.y:.2f}  z={pos.z:.2f}")
+        return task.cont
 
 if __name__ == "__main__":
     App().run()
