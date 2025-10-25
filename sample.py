@@ -1,9 +1,10 @@
-from panda3d.core import NodePath, Vec3
+from panda3d.core import NodePath, Vec3, Point3
 from primitive.polygon import Polygon, Cube, Plane
 from primitive.render import RenderEntity
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
+from core.camera import OrbitCamera   # ← 追加
 
 class App(ShowBase):
     def __init__(self):
@@ -14,7 +15,6 @@ class App(ShowBase):
         floor = RenderEntity(self.render, "floor")
         floor.set_polygon(Plane(size=5.0))
         floor.set_pos(0, 0, 0.0)
-        
 
         # 空のエンティティ作成
         self.entity = RenderEntity(self.render, "cube_entity")
@@ -27,13 +27,22 @@ class App(ShowBase):
         # Cubeの位置はそのまま
         self.entity.set_pos(0, 1.5, 0.2)
 
-        # カメラの位置設定
-        self.cam.setPos(0, 0.0, 0.5)
-        self.cam.lookAt(self.entity.np)
+        # --- ここからカメラ ---
+        # 初期位置は原点を見るが、ターゲットをキューブにしておくと扱いやすい
+        target = self.entity.np.get_pos(self.render)  # or Point3(0, 0, 0)
+        self.cam_ctrl = OrbitCamera(
+            self,
+            target=Point3(target),
+            distance=2.0,   # 好みで
+            yaw_deg=35.0,
+            pitch_deg=20.0
+        )
+        self.cam_ctrl.enable()
+        # --- ここまで ---
 
         # テキスト（右下）
         self.pos_text = OnscreenText(
-            text="", pos=(1.2, -0.95),  # 右下
+            text="", pos=(1.2, -0.95),
             scale=0.05, fg=(1, 1, 1, 1), align=TextNode.ARight, mayChange=True
         )
         self.taskMgr.add(self.update_text, "update_text_task")
@@ -47,14 +56,13 @@ class App(ShowBase):
         self.accept("m", self.entity.move, [0, -self.step, 0])  # 後ろへ
         self.accept("w", self.entity.move, [0, 0, self.step])  # 上へ
         self.accept("s", self.entity.move, [0, 0, -self.step])  # 下へ
-        self.accept("f", self.entity.rotate, [0, 0, self.step_deg])  # 右回転
-        self.accept("a", self.entity.rotate, [0, 0, -self.step_deg])  # 左回転
-        self.accept("r", self.entity.rotate, [self.step_deg, 0, 0])  # 上回転
-        self.accept("v", self.entity.rotate, [-self.step_deg, 0, 0])  # 下回転
-        self.accept("t", self.entity.rotate, [0, self.step_deg, 0])  # 時計回り
-        self.accept("g", self.entity.rotate, [0, -self.step_deg, 0])  # 反時計回り
+        self.accept("f", self.entity.rotate, [0, 0, self.step_deg])    # 右回転
+        self.accept("a", self.entity.rotate, [0, 0, -self.step_deg])   # 左回転
+        self.accept("r", self.entity.rotate, [self.step_deg, 0, 0])    # 上回転
+        self.accept("v", self.entity.rotate, [-self.step_deg, 0, 0])   # 下回転
+        self.accept("t", self.entity.rotate, [0, self.step_deg, 0])    # 時計回り
+        self.accept("g", self.entity.rotate, [0, -self.step_deg, 0])   # 反時計回り
         self.accept("escape", self.userExit)
-
 
     def update_text(self, task):
         pos = self.entity.np.getPos(self.render)
