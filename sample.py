@@ -8,11 +8,18 @@ class App(ShowBase):
         super().__init__()
         self.disableMouse()
 
+        # 空のエンティティ作成
         self.entity = RenderEntity(self.render, "cube_entity")
-        self.entity.set_polygon(Cube(size=0.2))     # 形状注入
-        self.entity.set_pos(0, 1.5, 0.2)            # 位置は描画側で管理
 
-        # カメラ
+        # キューブの形状を作成
+        cube = Cube(size=0.2)
+        # 形状注入
+        self.entity.set_polygon(cube)
+
+        # エンティティの位置設定
+        self.entity.set_pos(0, 1.5, 0.2)
+
+        # カメラの位置設定
         self.cam.setPos(0, 0.5, 0.5)
         self.cam.lookAt(self.entity.np)
 

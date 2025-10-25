@@ -14,7 +14,7 @@ class RenderEntity:
             self._geom_np.removeNode()
         self._geom_np = self.np.attachNewNode(node)
         # 裏面が消えるのが気になるなら TwoSided
-        self._geom_np.setTwoSided(True)
+        self._geom_np.setTwoSided(False) #裏面は描画しない
 
     # 位置・姿勢などの薄いAPI（必要に応じて）
     def set_pos(self, x, y, z): 

@@ -31,10 +31,8 @@ class Cube(Polygon):
             (0,4,5), (0,5,1),     # -Y
         ]
         if vertex_colors is None:
-            self.colors: List[Color] = [
-                (1,0,0,1),(0,1,0,1),(0,0,1,1),(1,1,0,1),
-                (1,0,1,1),(0,1,1,1),(1,1,1,1),(0.5,0.5,0.5,1),
-            ]
+            white = (1, 1, 1, 1)
+            self.colors: List[Color] = [white for _ in range(8)]
         else:
             assert len(vertex_colors) == 8
             self.colors = vertex_colors
