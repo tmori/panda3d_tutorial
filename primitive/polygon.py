@@ -2,21 +2,26 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 from panda3d.core import (
     GeomNode, Geom, GeomVertexData, GeomVertexFormat, GeomVertexWriter,
-    GeomTriangles, Vec3
+    GeomTriangles, Vec3, Vec4
 )
 Color = Tuple[float, float, float, float]
 
 class Polygon(ABC):
     """形状の抽象：GeomNode を作って返す責務だけを持つ"""
     def make_geom_node(self, name: str = "polygon") -> GeomNode:
-        vformat = GeomVertexFormat.getV3c4()
+        vformat = GeomVertexFormat.getV3n3c4()
         vdata = GeomVertexData(name, vformat, Geom.UH_static)
         vdata.setNumRows(len(self.vtx))
 
         vw = GeomVertexWriter(vdata, "vertex")
+        nw = GeomVertexWriter(vdata, "normal")
         cw = GeomVertexWriter(vdata, "color")
-        for p, col in zip(self.vtx, self.colors):
+
+
+        # 書き込み
+        for p, n, col in zip(self.vtx, self.normals, self.colors):
             vw.addData3f(p)
+            nw.addData3f(n)
             cw.addData4f(*col)
 
         prim = GeomTriangles(Geom.UH_static)
@@ -55,6 +60,18 @@ class Cube(Polygon):
             assert len(vertex_colors) == 8
             self.colors = vertex_colors
 
+        # --- 頂点法線を三角形から集計して求める（スムーズシェーディング） ---
+        normals = [Vec3(0, 0, 0) for _ in self.vtx]
+        for a, b, c in self.tris:
+            pa, pb, pc = self.vtx[a], self.vtx[b], self.vtx[c]
+            n = (pb - pa).cross(pc - pa)
+            if n.length_squared() > 0:
+                n.normalize()
+                normals[a] += n; normals[b] += n; normals[c] += n
+        for i in range(len(normals)):
+            if normals[i].length_squared() > 0:
+                normals[i].normalize()
+        self.normals = normals
 
     
 class Plane(Polygon):
@@ -74,6 +91,9 @@ class Plane(Polygon):
         ]
         # 4 頂点すべて同色（単色）
         self.colors: List[Color] = [color] * 4
+
+        # 法線は全頂点で上向き
+        self.normals: List[Vec3] = [Vec3(0, 0, 1)] * 4
 
 
 

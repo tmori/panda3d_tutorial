@@ -4,17 +4,28 @@ from primitive.render import RenderEntity
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import TextNode
 from direct.gui.OnscreenText import OnscreenText
-from core.camera import OrbitCamera   # ← 追加
+from core.camera import OrbitCamera 
+from core.light import LightRig
+import panda3d
+print(f"--- Running Panda3D Version: {panda3d.__version__} ---")
 
 class App(ShowBase):
     def __init__(self):
         super().__init__()
         self.disableMouse()
 
+        # --- 照明セットアップ（先に設定） ---
+        self.render.setShaderAuto()
+        #self.lights = LightRig(self.render, shadows=True)
+
         # 床
         floor = RenderEntity(self.render, "floor")
         floor.set_polygon(Plane(size=5.0))
         floor.set_pos(0, 0, 0.0)
+        #floor.np.set_tag('ShadowReceiver', 'true')
+
+        # 床は影を受ける
+        #floor.np.show()  # 念のため
 
         # 空のエンティティ作成
         self.entity = RenderEntity(self.render, "cube_entity")
@@ -24,21 +35,25 @@ class App(ShowBase):
         # 形状注入
         self.entity.set_polygon(cube)
 
-        # Cubeの位置はそのまま
-        self.entity.set_pos(0, 1.5, 0.2)
+        #self.entity.np.set_tag('ShadowCaster', 'true')
+
+        # Cubeの位置
+        self.entity.set_pos(0, 0, 0.3)  # 床から少し浮かせる
 
         # --- ここからカメラ ---
-        # 初期位置は原点を見るが、ターゲットをキューブにしておくと扱いやすい
-        target = self.entity.np.get_pos(self.render)  # or Point3(0, 0, 0)
+        target = Point3(0, 0, 0.15)  # キューブの中心あたりを見る
         self.cam_ctrl = OrbitCamera(
             self,
-            target=Point3(target),
-            distance=2.0,   # 好みで
+            target=target,
+            distance=2.0,
             yaw_deg=35.0,
-            pitch_deg=20.0
+            pitch_deg=30.0
         )
         self.cam_ctrl.enable()
-        # --- ここまで ---
+
+        # キーバインド
+        #self.accept("1", lambda: self.lights.toggle(True))
+        #self.accept("2", lambda: self.lights.toggle(False))
 
         # テキスト（右下）
         self.pos_text = OnscreenText(
@@ -49,19 +64,19 @@ class App(ShowBase):
 
         # 入力（1回で1cm）
         self.step = 0.01
-        self.step_deg = 5  # 5度
-        self.accept("j", self.entity.move, [-self.step, 0, 0])  # 左へ
-        self.accept("k", self.entity.move, [ self.step, 0, 0])  # 右へ
-        self.accept("i", self.entity.move, [0, self.step, 0])  # 前へ
-        self.accept("m", self.entity.move, [0, -self.step, 0])  # 後ろへ
-        self.accept("w", self.entity.move, [0, 0, self.step])  # 上へ
-        self.accept("s", self.entity.move, [0, 0, -self.step])  # 下へ
-        self.accept("f", self.entity.rotate, [0, 0, self.step_deg])    # 右回転
-        self.accept("a", self.entity.rotate, [0, 0, -self.step_deg])   # 左回転
-        self.accept("r", self.entity.rotate, [self.step_deg, 0, 0])    # 上回転
-        self.accept("v", self.entity.rotate, [-self.step_deg, 0, 0])   # 下回転
-        self.accept("t", self.entity.rotate, [0, self.step_deg, 0])    # 時計回り
-        self.accept("g", self.entity.rotate, [0, -self.step_deg, 0])   # 反時計回り
+        self.step_deg = 5
+        self.accept("j", self.entity.move, [-self.step, 0, 0])
+        self.accept("k", self.entity.move, [ self.step, 0, 0])
+        self.accept("i", self.entity.move, [0, self.step, 0])
+        self.accept("m", self.entity.move, [0, -self.step, 0])
+        self.accept("w", self.entity.move, [0, 0, self.step])
+        self.accept("s", self.entity.move, [0, 0, -self.step])
+        self.accept("f", self.entity.rotate, [0, 0, self.step_deg])
+        self.accept("a", self.entity.rotate, [0, 0, -self.step_deg])
+        self.accept("r", self.entity.rotate, [self.step_deg, 0, 0])
+        self.accept("v", self.entity.rotate, [-self.step_deg, 0, 0])
+        self.accept("t", self.entity.rotate, [0, self.step_deg, 0])
+        self.accept("g", self.entity.rotate, [0, -self.step_deg, 0])
         self.accept("escape", self.userExit)
 
     def update_text(self, task):
