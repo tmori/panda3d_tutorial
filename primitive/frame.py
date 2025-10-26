@@ -16,9 +16,9 @@ class Frame:
         twist.linear.x = pos.y
         twist.linear.y = -pos.x
         twist.linear.z = pos.z
-        twist.angular.x = orientation_deg.y * pi / 180.0
-        twist.angular.y = -orientation_deg.x * pi / 180.0
-        twist.angular.z = orientation_deg.z * pi / 180.0
+        twist.angular.x = orientation_deg.z * pi / 180.0 #Roll
+        twist.angular.y = -orientation_deg.y * pi / 180.0 #Pitch
+        twist.angular.z = orientation_deg.x * pi / 180.0 #Heading
         return twist
 
     @staticmethod
@@ -28,7 +28,7 @@ class Frame:
             ros_twist.linear.x, 
             ros_twist.linear.z)
         orientation = Vec3(
-            -ros_twist.angular.y * 180.0 / pi,
-            ros_twist.angular.x * 180.0 / pi,
-            ros_twist.angular.z * 180.0 / pi)
+            ros_twist.angular.z * 180.0 / pi, #heading
+            -ros_twist.angular.y * 180.0 / pi, #pitch
+            ros_twist.angular.x * 180.0 / pi)  #roll
         return pos, orientation
