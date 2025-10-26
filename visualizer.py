@@ -7,6 +7,7 @@ from direct.gui.OnscreenText import OnscreenText
 from core.camera import OrbitCamera 
 from core.light import LightRig
 import panda3d
+import json
 print(f"--- Running Panda3D Version: {panda3d.__version__} ---")
 
 class App(ShowBase):
@@ -16,30 +17,15 @@ class App(ShowBase):
 
         self.render.setShaderAuto()
 
-        drone_model = RenderEntity(self.render, "drone_model")
-        drone_model.load_model(self.loader, "assets/models/drone.glb", copy=False)
-        drone_model.set_pos(0, 0.0, 0.01)
-        drone_model._geom_np.setHpr(180, 180, 0)
-    
-        rotor1 = RenderEntity(self.render, "drone_rotor1")
-        rotor1.set_pos(0.062, 0.065, -0.01)
-        rotor1.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
-        drone_model.add_child(rotor1)
+        with open('drone_config.json', 'r') as f:
+            config = json.load(f)
 
-        rotor2 = RenderEntity(self.render, "drone_rotor2")
-        rotor2.set_pos(0.062, -0.025, -0.01)
-        rotor2.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
-        drone_model.add_child(rotor2)
+        drone_model = self._create_entity_from_config(config, copy=False)
 
-        rotor3 = RenderEntity(self.render, "drone_rotor3")
-        rotor3.set_pos(-0.062, -0.025, -0.01)
-        rotor3.load_model(self.loader, "assets/models/prop-2.glb", copy=True)
-        drone_model.add_child(rotor3)
-
-        rotor4 = RenderEntity(self.render, "drone_rotor4")
-        rotor4.set_pos(-0.062, 0.065, -0.01)
-        rotor4.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
-        drone_model.add_child(rotor4)
+        if 'children' in config:
+            for child_config in config['children']:
+                child_entity = self._create_entity_from_config(child_config, copy=True)
+                drone_model.add_child(child_entity)
 
         # --- 照明セットアップ（先に設定） ---
         self.lights = LightRig(self.render, shadows=True)
@@ -80,6 +66,15 @@ class App(ShowBase):
             scale=0.05, fg=(1, 1, 1, 1), align=TextNode.ARight, mayChange=True
         )
         self.taskMgr.add(self.update_text, "update_text_task")
+
+    def _create_entity_from_config(self, config, copy=False):
+        entity = RenderEntity(self.render, config['name'])
+        entity.load_model(self.loader, config['model'], copy=copy)
+        if 'pos' in config:
+            entity.set_pos(*config['pos'])
+        if 'hpr' in config:
+            entity._geom_np.setHpr(*config['hpr'])
+        return entity
 
     def set_pose_and_rotation(self, pos: Vec3, hpr: Vec3, rotation_speed: float = 1.0):
         self.entity.set_pos(x = pos.x, y = pos.y, z = pos.z)
