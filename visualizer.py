@@ -17,9 +17,29 @@ class App(ShowBase):
         self.render.setShaderAuto()
 
         drone_model = RenderEntity(self.render, "drone_model")
-        drone_model.load_model(self.loader, "assets/models/dji_avatar2.glb", copy=False)
-        drone_model.set_pos(0, 0.0, 1)
+        drone_model.load_model(self.loader, "assets/models/drone.glb", copy=False)
+        drone_model.set_pos(0, 0.0, 0.01)
         drone_model._geom_np.setHpr(180, 180, 0)
+    
+        rotor1 = RenderEntity(self.render, "drone_rotor1")
+        rotor1.set_pos(0.062, 0.065, -0.01)
+        rotor1.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
+        drone_model.add_child(rotor1)
+
+        rotor2 = RenderEntity(self.render, "drone_rotor2")
+        rotor2.set_pos(0.062, -0.025, -0.01)
+        rotor2.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
+        drone_model.add_child(rotor2)
+
+        rotor3 = RenderEntity(self.render, "drone_rotor3")
+        rotor3.set_pos(-0.062, -0.025, -0.01)
+        rotor3.load_model(self.loader, "assets/models/prop-2.glb", copy=True)
+        drone_model.add_child(rotor3)
+
+        rotor4 = RenderEntity(self.render, "drone_rotor4")
+        rotor4.set_pos(-0.062, 0.065, -0.01)
+        rotor4.load_model(self.loader, "assets/models/prop-1.glb", copy=True)
+        drone_model.add_child(rotor4)
 
         # --- 照明セットアップ（先に設定） ---
         self.lights = LightRig(self.render, shadows=True)
@@ -61,9 +81,16 @@ class App(ShowBase):
         )
         self.taskMgr.add(self.update_text, "update_text_task")
 
-    def set_pose(self, pos: Vec3, hpr: Vec3):
+    def set_pose_and_rotation(self, pos: Vec3, hpr: Vec3, rotation_speed: float = 1.0):
         self.entity.set_pos(x = pos.x, y = pos.y, z = pos.z)
         self.entity.set_hpr(h = hpr.x, p = hpr.y, r = hpr.z)
+        index = 0
+        for rotor in self.entity.children:
+            if index % 2 == 0:
+                rotor.rotate_child_yaw(-rotation_speed)
+            else:
+                rotor.rotate_child_yaw(rotation_speed)
+            index += 1
 
     def update_text(self, task):
         pos = self.entity.np.getPos(self.render)

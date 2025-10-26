@@ -7,6 +7,12 @@ class RenderEntity:
     def __init__(self, parent, name: str = "entity"):
         self.np = parent.attachNewNode(name)
         self._geom_np: Optional[NodePath] = None  # 子ジオメトリの NodePath
+        self.children = []
+
+    def add_child(self, child: 'RenderEntity'):
+        """子エンティティをぶら下げる"""
+        child.np.reparentTo(self.np)
+        self.children.append(child)
 
     def set_polygon(self, poly: Polygon):
         node = poly.make_geom_node()
@@ -55,3 +61,7 @@ class RenderEntity:
     def rotate(self, dh=0, dp=0, dr=0): 
         h, p, r = self.np.getHpr()
         self.np.setHpr(h + dh, p + dp, r + dr)
+
+
+    def rotate_child_yaw(self, delta_yaw: float):
+        self._geom_np.setH(self._geom_np.getH() + delta_yaw)

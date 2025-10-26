@@ -4,6 +4,7 @@ import hakopy
 from hakoniwa_pdu.pdu_manager import PduManager
 from hakoniwa_pdu.impl.shm_communication_service import ShmCommunicationService
 from hakoniwa_pdu.pdu_msgs.geometry_msgs.pdu_conv_Twist import pdu_to_py_Twist
+from hakoniwa_pdu.pdu_msgs.hako_mavlink_msgs.pdu_conv_HakoHilActuatorControls import pdu_to_py_HakoHilActuatorControls
 from visualizer import App
 from primitive.frame import Frame
 import threading
@@ -47,13 +48,22 @@ def run():
         if pose is None:
             continue
 
+        raw_actuator = pdu.read_pdu_raw_data('Drone', 'motor')
+        rotor_speed = 0.0
+        if raw_actuator:
+            actuator = pdu_to_py_HakoHilActuatorControls(raw_actuator)
+            if len(actuator.controls) >= 4:
+                rotor_speed = actuator.controls[0]  # 代表値
+                rotor_speed *= 400.0 #適当にスケール
+
         print(f"[Visualizer] Drone Position: "
               f"x={pose.linear.x:.2f} y={pose.linear.y:.2f} z={pose.linear.z:.2f} | "
-              f"roll={pose.angular.x:.2f} pitch={pose.angular.y:.2f} yaw={pose.angular.z:.2f}")
-        
+              f"roll={pose.angular.x:.2f} pitch={pose.angular.y:.2f} yaw={pose.angular.z:.2f} | "
+              f"rotor_speed={rotor_speed:.2f}")
+
         if visualizer_runner is not None:
             panda3d_pos, panda3d_orientation = Frame.to_panda3d(pose)
-            visualizer_runner.set_pose(panda3d_pos, panda3d_orientation)
+            visualizer_runner.set_pose_and_rotation(panda3d_pos, panda3d_orientation, rotor_speed)
 
     return 0
 
