@@ -76,7 +76,7 @@ class Cube(Polygon):
     
 class Plane(Polygon):
     """Unity の Plane に相当（XZ 平面・原点中心）。size は一辺の長さ。"""
-    def __init__(self, size: float = 2.0, color: Color = (0.9, 0.95, 1.0, 1.0)):
+    def __init__(self, size: float = 2.0, color: Color = (0.2, 0.6, 0.6, 1.0)):
         s = size * 0.5
         # XY平面で Z=0 が床（上方向は +Z）
         self.vtx: List[Vec3] = [

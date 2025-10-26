@@ -56,10 +56,10 @@ def run():
                 rotor_speed = actuator.controls[0]  # 代表値
                 rotor_speed *= 400.0 #適当にスケール
 
-        print(f"[Visualizer] Drone Position: "
-              f"x={pose.linear.x:.2f} y={pose.linear.y:.2f} z={pose.linear.z:.2f} | "
-              f"roll={pose.angular.x:.2f} pitch={pose.angular.y:.2f} yaw={pose.angular.z:.2f} | "
-              f"rotor_speed={rotor_speed:.2f}")
+        #print(f"[Visualizer] Drone Position: "
+        #      f"x={pose.linear.x:.2f} y={pose.linear.y:.2f} z={pose.linear.z:.2f} | "
+        #      f"roll={pose.angular.x:.2f} pitch={pose.angular.y:.2f} yaw={pose.angular.z:.2f} | "
+        #      f"rotor_speed={rotor_speed:.2f}")
 
         if visualizer_runner is not None:
             panda3d_pos, panda3d_orientation = Frame.to_panda3d(pose)
